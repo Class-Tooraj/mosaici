@@ -91,6 +91,12 @@ class BaseOrder:
         order = (f'({int(start, 16)}, {int(end, 16)})' for start, end in order)
         return f"({', '.join(order)})"
 
+    def __len__(self) -> int:
+        """
+        Len Order
+        """
+        return len(self._order)
+
 
 # ORDER
 class Order(BaseOrder):
