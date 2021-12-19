@@ -1,0 +1,10 @@
+.vscode/
+.expire/
+.itool/
+test/
+test_file/
+venv/
+build/
+dist/
+*.egg-info/
+*.pyc
