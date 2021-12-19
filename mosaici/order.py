@@ -75,6 +75,23 @@ class BaseOrder:
         finally:
             del self
 
+    def __repr__(self) -> str:
+        """
+        Repr Of Order
+        """
+        order = (i.split(self.MIXER) for i in self._order)
+        order = (f'({int(start, 16)}, {int(end, 16)})' for start, end in order)
+        return f"{type(self).__qualname__}({'Limited' if self._limited else 'EndLess'}, {', '.join(order)})"
+
+    def __str__(self) -> str:
+        """
+        Order To String
+        """
+        order = (i.split(self.MIXER) for i in self._order)
+        order = (f'({int(start, 16)}, {int(end, 16)})' for start, end in order)
+        return f"({', '.join(order)})"
+
+
 # ORDER
 class Order(BaseOrder):
     """
