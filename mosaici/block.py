@@ -151,6 +151,18 @@ class BaseBlock:
         finally:
             del self
 
+    def __repr__(self) -> str:
+        """
+        Repr Of Block
+        """
+        return f"{type(self).__qualname__}({', '.join(self.to_hex())})"
+
+    def __str__(self) -> str:
+        """
+        Block To String
+        """
+        return f"({', '.join(self.to_hex())})"
+
     @staticmethod
     def default_order(order_obj: BaseOrder) -> BaseOrder:
         """
@@ -162,6 +174,7 @@ class BaseBlock:
         """
         raise NotImplemented
 
+
 # BLOCK
 class Block(BaseBlock):
     """
@@ -170,7 +183,7 @@ class Block(BaseBlock):
     REPEAT: int = 1
     SEPARATOR: str = ' '
     ORDER: Order = Order
-    DEFAULT_SYMBOL: tuple[str] = ('', ' ', '/', '-', '#', '!')
+    DEFAULT_SYMBOL: tuple[str, ...] = ('', ' ', '/', '-', '#', '!')
 
     def _make_block(self) -> None:
         stack = self._default or [i for i in range(0, 256)]
