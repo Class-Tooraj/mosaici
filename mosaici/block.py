@@ -49,6 +49,10 @@ class BaseBlock:
         if self._block is None:
             self._make_block()
 
+        # For Iterable Save Last Index Wrapped
+        # Iter indexes `0` to `255` then Stop Iteration If Call Again This Attr = 0 and loop Again
+        self._current = 0
+
     def _make_block(self) -> None:
         """
         Create Block If Block is `None`
@@ -90,19 +94,6 @@ class BaseBlock:
             res += bytes([self[i]])
         return res
 
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, BaseBlock):
-            return self._block == other._block
-        raise NotImplementedError
-
-    def __nq__(self, other: object) -> bool:
-        if isinstance(other, BaseBlock):
-            return self._block != other._block
-        raise NotImplementedError
-
-    def __len__(self) -> int:
-        return len(self._block)
-
     def to_hex(self) -> list[hex]:
         """
         return:
@@ -123,6 +114,41 @@ class BaseBlock:
             [list[bin]]: [Block To List Of Binarry Value]
         """
         return [bin(i).removeprefix('0b') for i in self._block]
+
+    def __iter__(self) -> object:
+        """
+        Iterable Block
+        Any Time Call Iter Or Use Iter Current Index Cleared.
+            `self._current = 0`
+        """
+        self._current = 0
+        return self
+
+    def __next__(self) -> int:
+        """
+        Iterable Items
+        return:
+            [int]: [Item]
+        """
+        try:
+            get = self[self._current]
+            self._current += 1
+            return get
+        except IndexError:
+            raise StopIteration
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, BaseBlock):
+            return self._block == other._block
+        raise NotImplementedError
+
+    def __nq__(self, other: object) -> bool:
+        if isinstance(other, BaseBlock):
+            return self._block != other._block
+        raise NotImplementedError
+
+    def __len__(self) -> int:
+        return len(self._block)
 
     def __getitem__(self, idx: int) -> int:
         """
