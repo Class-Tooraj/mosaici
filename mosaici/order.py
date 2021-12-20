@@ -17,7 +17,7 @@ class BaseOrder:
     SEPARATOR: str
     MIXER: str
 
-    def __init__(self, order: str, limited: bool) -> None:
+    def __init__(self, order: str, limited: bool = False) -> None:
         """
         const:
             SEPARATOR [str]: [Separator Symbol Between Pattern]
@@ -33,13 +33,23 @@ class BaseOrder:
         self._current = 0
         self._limited = limited
 
+    def endless(self) -> bool:
+        """
+        return:
+            [bool]: [if limited is `False` means `Endless` is `True`].
+            ** not limited **
+        """
+        return not self._limited
+
     def orderize(self) -> None:
         """
-        Change Pattern When Not Limited
+        Change Pattern When Not Limited (endless)
         """
         raise NotImplemented
 
     def __iter__(self) -> object:
+        # Reset Current Position Index To Start
+        self._current = 0
         return self
 
     def __enter__(self) -> object:
@@ -49,9 +59,11 @@ class BaseOrder:
         """
         Return Tuple (Start, End) Integer Value
         """
+        # EndLess Iter
         if self._current >= len(self._order) and not self._limited:
             self.orderize()
             self._current = 0
+
         try:
             start, end = self._order[self._current].split(self.MIXER)
             self._current += 1
@@ -105,9 +117,6 @@ class Order(BaseOrder):
     """
     SEPARATOR = ' '
     MIXER = '/'
-
-    def __init__(self, order: str, limited: bool = True) -> None:
-        super(Order, self).__init__(order, limited)
 
     def orderize(self) -> None:
         """
