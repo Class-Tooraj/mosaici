@@ -30,7 +30,7 @@ class BaseTemplate:
         self,
         blocks: tuple[BaseBlock] = None,
         order: BaseOrder | str = None,
-        default_block: Block | T_ITER = None,
+        default_block: BaseBlock | T_ITER = None,
         ) -> None:
         """
         const:
