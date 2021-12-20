@@ -220,9 +220,17 @@ class Block(BaseBlock):
 
         counter = 0
         while counter < self.REPEAT:
-            for start, end in self._order:
+
+            # Check If Order Not Endless (order is limited) Then reset
+            if not self._order.endless():
+                self._order = iter(self._order)
+
+            for _ in range(0, len(self._order)):
+                start, end = next(self._order)
                 stack = [*stack[start: end], *stack[end: ],*stack[: start]]
+
             counter += 1
+
         self._block = tuple(stack)
 
     @staticmethod
