@@ -181,6 +181,53 @@ class Convertor:
                     return value
 
 
+# PROTOCOL ABSTRACT
+class BaseProtocol:
+    """
+    Protocol
+    """
+
+    def __init__(self) -> None:
+        """
+        Initialize Protocol
+        """
+        self._convertor = Convertor
+
+    def __call__(self, value: int | str) -> int | str:
+        """
+        This Method Calls For Validate Value To Protocol
+        args:
+            value [int | str]: [Value Must be int Or Standard String]
+
+        return:
+            [int | str]: [Validate Value With Protocol]
+        """
+        raise NotImplementedError
+
+
+# STANDARD WRITE PROTOCOL
+class WriteProtocol(BaseProtocol):
+
+    def __init__(self) -> None:
+        """
+        Write Protocol
+        """
+        super(WriteProtocol, self).__init__()
+        self._validate = lambda x: self._convertor.std_hex(x)
+
+    @lru_cache(256)
+    def __call__(self, value: int | str) -> str:
+        """
+        Value To Standard Protocol For Write To File
+        args:
+            value [int | str]: [Value Must be int Or Standard String]
+
+        return:
+            [str]: [Standard Hex Value]
+        """
+        return self._validate(value)
+
+
 # PATTERN ABSTRACT
 class BasePattern:
     WRAPPED: Wrapped
@@ -233,4 +280,4 @@ class BasePattern:
 
 
 
-__dir__ = ('Wrapped', 'Convertor','BasePattern')
+__dir__ = ('Wrapped', 'Convertor', 'BaseProtocol', 'WriteProtocol', 'BasePattern')
