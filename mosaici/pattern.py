@@ -49,7 +49,32 @@ class Wrapped(Enum):
 class Convertor:
 
     @staticmethod
-    def hex_to_order(value: int | str, order: Wrapped) -> int | str:
+    def int_to_order(value: int, order: Wrapped) -> int | str:
+        """
+        int Convert To Standard Ordered Value
+
+        args:
+            value [int]: [int Value] '0', '255'
+            order [Wrapped]: [Standard Wrapped Type]
+
+        return:
+            [int | str]: [Standard Value Type Of Ordered]
+        """
+        match order.value:
+            case 'int':
+                return value
+
+            case 'hex':
+                return hex(value).removeprefix('0x').zfill(2)
+
+            case 'bin':
+                return bin(value).removeprefix('0b').zfill(8)
+
+            case 'oct':
+                return oct(value).removeprefix('0o').zfill(3)
+
+    @staticmethod
+    def hex_to_order(value: str, order: Wrapped) -> int | str:
         """
         Standard Hex Convert To Standard Ordered Value
 
@@ -272,11 +297,14 @@ class BasePattern:
 
     @staticmethod
     @lru_cache(256)
-    def _inorder(value: str, order: Wrapped) -> int | str:
+    def _inorder(value: int | str, order: Wrapped) -> int | str:
         """
         Convert Standard Hex To Order
         """
-        return Convertor.hex_to_order(value, order)
+        if isinstance(value, int):
+            return Convertor.int_to_order(value, order)
+        else:
+            return Convertor.hex_to_order(value, order)
 
 
 
