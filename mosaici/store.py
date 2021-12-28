@@ -13,7 +13,7 @@ from io import FileIO
 # IMPORT LOCAL
 from mosaici.exceptions import *
 from mosaici.pattern import Wrapped, BasePattern
-from mosaici.protocol import BaseProtocol, WriteProtocol
+from mosaici.protocol import BaseProtocol, WriteProtocol, ModeName
 
 # IMPORT TYPING
 from typing import Iterator, Iterable, Callable
@@ -261,6 +261,7 @@ class BaseStoreFile(BaseStoreIndexes):
             raise NotImplementedError
 
         super(BaseStoreFile, self).__init__(indexes)
+        self.mode_name = ModeName
 
     def write(self, file_obj: FileIO, truncate: bool = False) -> int:
         """
@@ -268,7 +269,7 @@ class BaseStoreFile(BaseStoreIndexes):
 
         args:
             file_obj [FileIO]: [File Object Object With `write` Method].
-                ** Support File Mode Text ['w' or 'a'] - Binarray ['wb' or 'ab'].
+                ** Support File Mode See `ModeName` Object.
             truncate [bool]: [Truncate File] default is `False`.
 
         
@@ -295,7 +296,7 @@ class BaseStoreFile(BaseStoreIndexes):
         if truncate:
             file_obj.truncate()
 
-        mode = file_obj.mode
+        mode = self.mode_name(file_obj.mode)
 
         tokenize = (self.PROTOCOL(i, mode) for i in self)
         return file_obj.write(self.PROTOCOL[mode].join(tokenize))
@@ -306,7 +307,7 @@ class BaseStoreFile(BaseStoreIndexes):
 
         args:
             file_obj [FileIO]: [File Object Object With `write` Method].
-                ** Support File Mode Text ['w' or 'a'] - Binarray ['wb' or 'ab'].
+                ** Support File Mode See `ModeName` Object.
             truncate [bool]: [Truncate File] default is `False`.
         """
         if not file_obj.writable():
@@ -315,17 +316,17 @@ class BaseStoreFile(BaseStoreIndexes):
         if truncate:
             file_obj.truncate()
 
-        mode = file_obj.mode
+        mode = self.mode_name(file_obj.mode)
 
         count = 0
-        match mode:
-            case 'w' | 'a':
+        match mode.mode_type:
+            case self.PROTOCOL.MODETYPE.TXT:
                 for i in self:
                     if isinstance(i, str):
                         count += file_obj.write(i)
                     else:
                         count += file_obj.write(str(i))
-            case 'wb' | 'ab':
+            case self.PROTOCOL.MODETYPE.BIN:
                 for i in self:
                     if isinstance(i, int):
                         count += file_obj.write(bytes([i]))
