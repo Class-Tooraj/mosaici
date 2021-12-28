@@ -22,3 +22,13 @@ class IndexesIsNotDefinedError(ValueError):
 # FILE INDEXES ERROR
 class AccessDeniedFileIsClosed(IOError):
     pass
+
+
+# MODE NOT EXISTS -> `ModeName`
+class ModeNotExistsError(NameError):
+    pass
+
+
+# ACTION NOT EXISTS -> `ModeName`
+class ActionNotExistsError(NameError):
+    pass
