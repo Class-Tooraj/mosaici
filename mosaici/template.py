@@ -15,7 +15,7 @@ from mosaici.block import Block, BaseBlock
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
 # DEFAULT BLOCK ITER TYPE SUPPORT
-T_ITER: tuple[int, ...] | list[int]
+T_ITER: tuple[int, ...] | list[int] = tuple[int, ...] | list[int]
 
 # TEMPLATE ABSTARCT
 class BaseTemplate:
@@ -111,7 +111,7 @@ class BaseTemplate:
         return:
             [int]: [Indexes of Value in The Block]
         """
-        block = self.valid_block(block)
+        block = self.valid_block(block, len(self))
         return self._template[block].index(value)
 
     def value(self, block: int, indexes: int) -> bytes:
@@ -123,7 +123,7 @@ class BaseTemplate:
         return:
             [bytes]: [Value in The Block & Indexes Place]
         """
-        block = self.valid_block(block)
+        block = self.valid_block(block, len(self))
         return bytes([self._template[block][indexes]])
 
     def data_to_idx(self, data: bytes) -> str:
@@ -136,8 +136,9 @@ class BaseTemplate:
         """
         res = []
 
+        size = len(self)
         for idx_block, i in enumerate(data):
-            _block = self.valid_block(idx_block)
+            _block = self.valid_block(idx_block, size)
             idx = self._template[_block].index(i)
             res.append(hex(idx).removeprefix('0x').upper())
 
@@ -154,26 +155,13 @@ class BaseTemplate:
         indexes = indexes.split(self.SEPARATOR)
         res = b''
 
+        size = len(self)
         for idx_block, i in enumerate(indexes):
-            _block = self.valid_block(idx_block)
+            _block = self.valid_block(idx_block, size)
             value = self._template[_block][int(i, 16)]
             res += bytes([value])
 
         return res
-
-    def valid_block(self, idx_block: int) -> int:
-        """
-        Validate Block Number From Template
-        When Block Indexes Bigger Than Blocks Validate Block Number.
-        args:
-            idx_block [int]: [Number Of Block].
-        return:
-            [int]: [Block if Exists OtherWise Converted To Existed Block].
-        """
-        size = len(self)
-        if idx_block >= size:
-            return self.valid_block(idx_block - size)
-        return idx_block
 
     def __iter__(self) -> object:
         """
@@ -280,6 +268,37 @@ class BaseTemplate:
         """
         raise NotImplemented
 
+    @staticmethod
+    def valid_block(idx_block: int, size: int) -> int:
+        """
+        Validate Block Number From Template
+        When Block Indexes Bigger Than Blocks Validate Block Number.
+        args:
+            idx_block [int]: [Number Of Block].
+        return:
+            [int]: [Block if Exists OtherWise Converted To Existed Block].
+        """
+        # I Changed Algorithm - Fixed Problem Maximum Recursion & Very Low Speed For Working
+        done = False
+        while idx_block >= size:
+
+            if idx_block == size:
+                idx_block -= (size << 1)
+                continue
+
+            elif idx_block <= (size + (size//2)):
+                idx_block <<= 1
+                continue
+
+            elif idx_block >= (size * 2):
+                idx_block //= size
+                continue
+
+            else:
+                idx_block -= size
+                continue
+
+        return idx_block
 
 # TEMPLATE
 class Template(BaseTemplate):
@@ -287,7 +306,7 @@ class Template(BaseTemplate):
     SIZE: int = 256
     ORDER: Order = Order
     BLOCK: Block = Block
-    SEPARATOR: str = ' '
+    SEPARATOR: str = ''
     DEFAULT_SYMBOL: tuple[str, ...] = ('', ' ', '/', '-', '#', '!')
 
     def _gen_default_block(self) -> Block:
@@ -327,4 +346,4 @@ class Template(BaseTemplate):
 
 
 
-__dir__ = ('Template', 'BaseTemplate')
+__dir__ = ('T_ITER', 'BaseTemplate', 'Template')
