@@ -32,3 +32,8 @@ class ModeNotExistsError(NameError):
 # ACTION NOT EXISTS -> `ModeName`
 class ActionNotExistsError(NameError):
     pass
+
+
+# FILE ERROR
+class FileIsNotReadableError(IOError):
+    pass
