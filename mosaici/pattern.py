@@ -65,7 +65,7 @@ class Convertor:
                 return value
 
             case 'hex':
-                return hex(value).removeprefix('0x').zfill(2)
+                return hex(value).removeprefix('0x').zfill(2).upper()
 
             case 'bin':
                 return bin(value).removeprefix('0b').zfill(8)
@@ -109,7 +109,7 @@ class Convertor:
         return:
             [hex]: [Standard `Hex` Value]
         """
-        validator = lambda x: hex(x).removeprefix('0x').upper().zfill(2)
+        validator = lambda x: hex(x).removeprefix('0x').upper().zfill(2).upper()
 
         if isinstance(value, int):
             return validator(value)
