@@ -541,6 +541,10 @@ class BaseFileTemplate(BaseTemplate):
 
 # TEMPLATE
 class Template(BaseTemplate):
+    """
+    Template Module Instance of `BaseTemplate`
+    Customize Method : `_gen_default_block`, `_make_template`, `default_order`
+    """
     REPEAT: int = 1
     SIZE: int = 256
     ORDER: Order = Order
@@ -549,44 +553,76 @@ class Template(BaseTemplate):
     DEFAULT_SYMBOL: tuple[str, ...] = ('', ' ', '/', '-', '#', '!')
 
     def _gen_default_block(self) -> Block:
+        """
+        Generate Default Block
+        return:
+            [Block]: [Generated Block].
+        """
+        # Create New Block With Default Algorithm
         make_new = [*self._temp_block[1: ], *self._temp_block[: 1]]
+        # Assign Created Block To '_temp_block' Attr
         self._temp_block = self.BLOCK(order='', default_block=make_new)
         return self._temp_block
 
     def _make_template(self) -> None:
+        """
+        Create Template
+        Generate Full Template With Ordered Or Default Algorithm Or ...
+        """
+        # Check If Order Valid For Generate Or Not
         if self._order is None:
+            # Without Order Template Generate
             self._temp_block = self._default_block
             self._template = tuple((self._gen_default_block() for _ in range(0, self.SIZE)))
             return
 
+        # Create Template With Order
         order = self._order
         self._temp_block = self.BLOCK(order=order, default_block=self._default_block)
 
         counter = 0
         template = []
 
+        # Generate Template With Repeat Size
         while counter < self.REPEAT:
 
+            # Create Blocks Loop
             for _ in range(0, len(self._order)):
+                # Add Generated Block To `template` List
                 template.append(self.BLOCK(order=self._order, default_block=self._temp_block))
+                # Last Generated Template Assign To `_temp_block` Attr
                 self._temp_block = template[-1]
 
             counter += 1
 
         self._template = tuple(template)
+        # Remove `_temp_block` Free Memory
+        del self._temp_block
 
     @staticmethod
     def default_order(order_obj: Order, size: int) -> Order:
+        """
+        Default Order Generated If Order Default Order For Use
+        args:
+            order_obj [Order]: [Order Object For Return Default Order].
+            size [int]: [Order Size Needed For How Many Order Generated].
+        """
         SEPARATOR = order_obj.SEPARATOR
         res = []
         for i in range(1, (size + 1)):
-            res.append(f'{hex(i)}/{hex(i*2)}')
+            res.append(f'{hex(i).removeprefix("0x").upper()}/{hex(i*2).removeprefix("0x").upper()}')
         return order_obj(SEPARATOR.join(res))
 
 
+# FILE TEMPLATE
 class FileTemplate(BaseFileTemplate):
+    """
+    FileTemplate - Instance of BaseFileTemplate
+    Use This Module For Load Saved Template
+    """
     SEPARATOR: str = ' '
     BLOCK: Block = Block
+
 
 
 __dir__ = ('T_ITER', 'BaseTemplate', 'BaseFileTemplate', 'Template', 'FileTemplate')
