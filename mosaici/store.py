@@ -16,7 +16,7 @@ from mosaici.pattern import Wrapped, BasePattern
 from mosaici.protocol import BaseProtocol, WriteProtocol, ModeName
 
 # IMPORT TYPING
-from typing import Iterator, Iterable, Callable
+from typing import Iterator, Iterable, Callable, Generator
 
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
@@ -117,13 +117,18 @@ class BaseStoreIndexes(BasePattern):
             except IndexError:
                 raise StopIteration
 
-        elif isinstance(self._indexes, (Iterator, Iterable)):
+        elif isinstance(self._indexes, (Iterator, Iterable, Generator)):
             try:
                 get = next(self._indexes)
                 self._current += 1
                 return self._inorder(get, self.WRAPPED)
-            except (StopIteration, Exception):
+
+            except StopIteration:
+                self._indexes = None
                 raise StopIteration
+
+            except Exception as err:
+                raise err
 
     def __str__(self) -> str:
         if self._indexes is None:
@@ -140,7 +145,7 @@ class BaseStoreIndexes(BasePattern):
     def __repr__(self) -> str:
         if self._indexes is None:
             return f'{type(self).__qualname__}([None])'
-        return f'{type(self).__qualname__}(TYPE: {type(self._indexes)}, LENGTH: {len(self)})'
+        return f'{type(self).__qualname__}([TYPE: {type(self._indexes).__qualname__}])'
 
     def __exit__(self, *_) -> None:
         try:
