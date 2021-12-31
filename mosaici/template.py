@@ -7,17 +7,25 @@ __EMAIL__ = "Toorajjahangiri@gmail.com"
 # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #
 
 
+# IMPORT
+import os
+
 # IMPORT LOCAL
+from mosaici.exceptions import *
 from mosaici.order import Order, BaseOrder
 from mosaici.block import Block, BaseBlock
 
+
+# IMPORT TYPING
+from typing import NamedTuple
 
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
 # DEFAULT BLOCK ITER TYPE SUPPORT
 T_ITER: tuple[int, ...] | list[int] = tuple[int, ...] | list[int]
 
-# TEMPLATE ABSTARCT
+
+# TEMPLATE ABSTRACT
 class BaseTemplate:
     REPEAT: int
     SIZE: int
@@ -163,6 +171,50 @@ class BaseTemplate:
 
         return res
 
+    def save_template(self, path: str | os.PathLike) -> NamedTuple[int, int, int]:
+        """
+        Save Template Created For Use `Load` Saved Template Use Instance `BaseFileTemplate` Modules
+        args:
+            path [str|PathLike]: [File Path For Save Template]
+
+        return:
+            [NamedTuple[int, int, int]]: [Raw Bin Write, Block Count Write, Block Count Member]
+            ** 'SaveInfo('write'= 65536, 'block'= 256, 'member'= 256)'
+        """
+        # Create Named Tuple For Return Saved
+        _saved = NamedTuple('SavedInfo', (('write', int), ('block', int), ('member', int)))
+
+        path = os.path.realpath(path)
+
+        # Block Convert To Bytes
+        to_bytes = (
+            b''.join(block.to_bytes())
+            for block in self
+            )
+
+        # Open File With Write Binarray Mode
+        with open(path, 'wb') as f:
+            saved_bin = f.write(b''.join(to_bytes))
+
+        # Get Member Of Block - All Block Must Be Same Member
+        _member = len(self._template[0])
+        # Return SavedInfo - [Count Write Bin Into, Count Write Block, Count Block Member]
+        return _saved(saved_bin, (saved_bin // _member), _member)
+
+    def get_valid_block(self, block_idx: int) -> BaseBlock:
+        """
+        Get Valid Block
+        Block Index Validate Before Getting Block.
+        args:
+            block_idx[int]: [Get Index Of Block].
+
+        return:
+            [BaseBlock]: [Block With Index].
+        """
+        # Validate Index Block With `valid_block()` Static Method.
+        _block_idx = self.valid_block(block_idx, len(self))
+        return self[_block_idx]
+
     def __iter__(self) -> object:
         """
         Make Object Iterable
@@ -177,6 +229,7 @@ class BaseTemplate:
         try:
             get = self._template[self._current]
             self._current += 1
+            return get
         except IndexError:
             raise StopIteration
 
@@ -300,13 +353,199 @@ class BaseTemplate:
 
         return idx_block
 
+
+# FILE TEMPLATE ABSTRACT
+class BaseFileTemplate(BaseTemplate):
+    SEPARATOR: str
+    BLOCK: BaseBlock
+
+    def __init__(self, path: str | os.PathLike, block_member: int = 256) -> None:
+        """
+        FileTemplate Load Saved Template.
+        ** This Module Not Support Created Template Only For Loading And Use Saved Template.
+        ** NOTE: For Copy Template Is Already Loaded Use `save_template()` module.
+        const:
+            SEPARATOR [str]: [Seperator Use For `Data to indexes` & `Indexes to Data`].
+            BLOCK [BaseBlock]: [Block Object Must be instance of BaseBlock].
+
+        args:
+            path [str|PathLike]: [Path Saved Template File].
+            block_member [int]: [Count Of Member In Blocks] default is `256`.
+
+        ** NOTE: After Done Use This Module Must Be Closed File with `close()` method.
+        ** NOTE: Use `with` Statement For Closing File Automatic After Done.
+        """
+        if not self.BLOCK or not self.SEPARATOR:
+            raise NotImplementedError
+
+        # Path To Real Path
+        self._path = os.path.realpath(path)
+
+        # Open Template File
+        self._file = open(self._path, 'rb')
+        self.closed = self._file.closed
+
+        self._current= 0
+        self._member = block_member
+
+        self._end = self.size()
+
+    @property
+    def _template(self) -> tuple[BaseBlock]:
+        """
+        Property Get Template
+        return:
+            [tuple[BaseBlock]]:[All Block]
+
+        ** example: 'tmpl = self._template'
+        """
+        return tuple(self)
+
+    def close(self) -> None:
+        """
+        Close File
+        if Use `with` Statement This Method Call Automatic After Done Working
+
+        ** for check file is closed use Attr `closed`  [bool] if closed file `True` Otherwise `False`
+        """
+        self._file.close()
+        self.closed = self._file.closed
+
+    def size(self) -> int:
+        """
+        Size Of File.
+        return:
+            [int]: [Size Of File].
+        """
+        # Seeker Go End Of File
+        self._file.seek(0,2)
+        # Get Position Of Seeker
+        get = self._file.tell()
+        # Seeker Back To The Previous Position
+        self._file.seek(self._current, 0)
+        return get
+
+    def value(self, block: int, indexes: int) -> bytes:
+        """
+        Get Value Of Indexes Order
+        args:
+            block [int]: [Block Index].
+            indexes [int]: [Block Member].
+
+        return:
+            [bytes]: [Member from Block Placed in Index Order with indexes].
+        """
+        # Validate Block Index
+        _block = self.valid_block(block, len(self))
+        # Get Member
+        get = self[_block][indexes]
+        return bytes([get])
+
+    def index(self, block: int, value: int) -> int:
+        """
+        Get Index Of Value
+        args:
+            block [int]: [Block Index].
+            value [int]: [Value Place Index].
+
+        return:
+            [int]: [Index The Value In The Block].
+        """
+        # Validate Block
+        _block = self.valid_block(block, len(self))
+        # Get Index
+        get = self[_block].index(value)
+        return get
+
+    def __len__(self) -> int:
+        """
+        Length Of Template
+        return:
+            [int]: [How Many Blocks In Template].
+        """
+        return self._end // self._member
+
+    def __iter__(self) -> object:
+        """
+        Iterator
+        return:
+            [object]: [Iterator File Template Object].
+        """
+        if self.closed:
+            raise AccessDeniedFileIsClosed
+
+        self._file.seek(0,0)
+        return super(BaseFileTemplate, self).__iter__()
+
+    def __next__(self) -> BaseBlock:
+        """
+        Next
+        return:
+            [BaseBlock]: [Next Block].
+        """
+        if self.closed:
+            raise AccessDeniedFileIsClosed
+
+        if self._current == self._end:
+            raise StopIteration
+
+        self._file.seek(self._current, 0)
+        temp = self._file.read(self._member)
+        self._current += 256
+        temp = tuple((int(i) for i in temp))
+        return self.BLOCK(temp)
+
+    def __getitem__(self, block_idx: int) -> BaseBlock:
+        """
+        Get Block With Block Idx
+        """
+        self._current = 0
+        self._current *= (block_idx * self._member)
+        if self._current > (self._end - 256):
+            raise IndexError
+        return next(self)
+
+    def __repr__(self) -> str:
+        """
+        Repr Method
+        return:
+            [str]: [Info From FileTemplate (`PATH`, `BLOCK`, `MEMBER`)]
+        """
+        return f"{type(self).__qualname__}(PATH: '{self._path}', BLOCK: {len(self)}, MEMBER: {self._member})"
+
+    def __str__(self) -> str:
+        """
+        Template To String With This Format - StringDict
+        '{block_index: block, ...}'
+        """
+        to_str = (f"{n}: {str(i)}" for n,i in enumerate(self))
+        return f"{{{', '.join(to_str)}}}"
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, BaseTemplate):
+            return all((it == ot for it, ot in zip(self, other)))
+        raise NotImplementedError
+
+    def __nq__(self, other: object) -> bool:
+        if isinstance(other, BaseTemplate):
+            return any((it != ot for it, ot in zip(self, other)))
+        raise NotImplementedError
+
+    def __exit__(self, *_) -> None:
+        try:
+            pass
+        finally:
+            self._file.close()
+            del self
+
+
 # TEMPLATE
 class Template(BaseTemplate):
     REPEAT: int = 1
     SIZE: int = 256
     ORDER: Order = Order
     BLOCK: Block = Block
-    SEPARATOR: str = ''
+    SEPARATOR: str = ' '
     DEFAULT_SYMBOL: tuple[str, ...] = ('', ' ', '/', '-', '#', '!')
 
     def _gen_default_block(self) -> Block:
@@ -334,7 +573,7 @@ class Template(BaseTemplate):
 
             counter += 1
 
-        self._template = template
+        self._template = tuple(template)
 
     @staticmethod
     def default_order(order_obj: Order, size: int) -> Order:
@@ -345,5 +584,9 @@ class Template(BaseTemplate):
         return order_obj(SEPARATOR.join(res))
 
 
+class FileTemplate(BaseFileTemplate):
+    SEPARATOR: str = ' '
+    BLOCK: Block = Block
 
-__dir__ = ('T_ITER', 'BaseTemplate', 'Template')
+
+__dir__ = ('T_ITER', 'BaseTemplate', 'BaseFileTemplate', 'Template', 'FileTemplate')
