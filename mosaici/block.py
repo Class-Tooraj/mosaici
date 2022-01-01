@@ -24,7 +24,7 @@ class BaseBlock:
         """
         const:
             REPEAT [int]: [Repeat Pattern].
-            SEPARATOR [str]: [Seprator Between Indexes].
+            SEPARATOR [str]: [Separator Between Indexes].
             ORDER [BaseOrder]: [Order Object].
             DEFAULT_SYMBOL [tuple[str]]: [Symbol For Use Default Order].
         args:
