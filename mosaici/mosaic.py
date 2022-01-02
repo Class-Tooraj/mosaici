@@ -97,7 +97,24 @@ class BaseMosaic:
         Property Setter Template
         Change Active Template
         """
+        # Fix File Template Closing Before Removed
+        # See - template.deleter
+        if self._template is not None:
+            del self.template
+
         self._template = template
+
+    @template.deleter
+    def template(self) -> None:
+        """
+        Property Deleter Template
+        """
+        if hasattr(self, 'close'):
+            self.close()
+            delattr(self, 'close')
+            delattr(self, 'closed')
+
+        self._template = None
 
     def index(self, block: int, value: int | bytes | str, order: str | Wrapped = Wrapped.INT) -> int | str:
         """
@@ -207,6 +224,11 @@ class BaseMosaic:
             path [str]: [Path Of Saved Template].
             member [int]: [Block Member Size].
         """
+        # Fix Closing Template if File Template
+        # See - 'template.deleter'
+        if self._template is not None:
+            del self.template
+
         self._template = self.FILE_TEMPLATE(path, member)
         self.close = self._template.close
         self.closed = lambda: self._file.closed
