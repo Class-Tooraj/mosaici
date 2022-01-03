@@ -37,3 +37,13 @@ class ActionNotExistsError(NameError):
 # FILE ERROR
 class FileIsNotReadableError(IOError):
     pass
+
+
+# TEMPLATE NOT DEFINED - MOSAIC MULTI TEMPLATE
+class TemplateNotDefinedError(KeyError):
+    pass
+
+
+# THERE IS NOT ACTIVE TEMPLATE - MOSAIC MULTI TEMPLATE
+class ThereIsNotActiveTemplate(ValueError):
+    pass
