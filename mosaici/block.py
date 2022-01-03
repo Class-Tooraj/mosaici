@@ -9,7 +9,7 @@ __EMAIL__ = "Toorajjahangiri@gmail.com"
 
 # IMPORT LOCAL
 from mosaici.order import Order, BaseOrder
-
+from mosaici.pattern import Convertor
 
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
@@ -44,11 +44,12 @@ class BaseBlock:
             self._order = order
 
         if isinstance(self._order, str) and self._order in self.DEFAULT_SYMBOL:
-            self._order = self.default_order(self.ORDER)
+            self._order = self.default_order(self.ORDER, (0, 128))
 
         if self._block is None:
             self._make_block()
 
+        self.convertor = Convertor
         # For Iterable Save Last Index Wrapped
         # Iter indexes `0` to `255` then Stop Iteration If Call Again This Attr = 0 and loop Again
         self._current = 0
@@ -97,9 +98,9 @@ class BaseBlock:
     def to_hex(self) -> list[hex]:
         """
         return:
-            [list[hex]]: [Block To List Of Hex Value]
+            [list[hex]]: [Block To List Of Standard Mosaici Hex Value]
         """
-        return [hex(i).removeprefix('0x').upper() for i in self._block]
+        return [self.convertor.std_hex(i) for i in self._block]
 
     def to_bytes(self) -> list[bytes]:
         """
@@ -111,9 +112,16 @@ class BaseBlock:
     def to_bin(self) -> list[bin]:
         """
         return:
-            [list[bin]]: [Block To List Of Binarry Value]
+            [list[bin]]: [Block To List Of Standard Mosaici Binarray Value]
         """
-        return [bin(i).removeprefix('0b') for i in self._block]
+        return [self.convertor.std_bin(i) for i in self._block]
+
+    def to_oct(self) -> list[oct]:
+        """
+        return:
+            [list[bin]]: [Block To List Of Standard Mosaici Octal Value]
+        """
+        return [self.convertor.std_oct(i) for i in self._block]
 
     def __iter__(self) -> object:
         """
@@ -190,15 +198,33 @@ class BaseBlock:
         return f"({', '.join(self.to_hex())})"
 
     @staticmethod
-    def default_order(order_obj: BaseOrder) -> BaseOrder:
+    def default_order(order_obj: BaseOrder, start: tuple[int, int]) -> BaseOrder:
         """
         Default Order If Use DEFAULT_SYMBOL
         args:
             order_obj [BaseOrder]: [Use Order Const For Make Default Order]
+            start [tuple[int, int]]: [Start Number For Order Give 2 Integer Start One, Start Tow]
         return:
             [BaseOrder]: [Order Object With Default Pattern]
         """
         raise NotImplemented
+
+    @staticmethod
+    def no_repeat_guarantee(stack: list[object]) -> list[object]:
+        """
+        No Repeat Guarantee
+        Create Block Some Order Repeating Item This Static Method Guarantees For Block No Repeated Item Exists.
+        args:
+            stack [list[object]]: [List Of Item For Making No Repeat].
+
+        return:
+            [list[object]]: [Array `List` With All Unique Item `No Repeating Item`].
+        """
+        res = []
+        for it in stack:
+            if it not in res:
+                res.append(it)
+        return res
 
 
 # BLOCK
@@ -212,7 +238,10 @@ class Block(BaseBlock):
     DEFAULT_SYMBOL: tuple[str, ...] = ('', ' ', '/', '-', '#', '!')
 
     def _make_block(self) -> None:
-        stack = self._default or [i for i in range(0, 256)]
+        if not self._default:
+            self._default = [i for i in range(0, 256)]
+
+        stack = self._default
 
         if self._order is None:
             self._block = stack
@@ -227,20 +256,22 @@ class Block(BaseBlock):
 
             for _ in range(0, len(self._order)):
                 start, end = next(self._order)
-                stack = [*stack[start: end], *stack[end: ],*stack[: start]]
+                stack = self.no_repeat_guarantee([*stack[start: end], *stack[end: ],*stack[: start]])
 
             counter += 1
 
         self._block = tuple(stack)
 
     @staticmethod
-    def default_order(order_obj: Order) -> Order:
+    def default_order(order_obj: Order, start: tuple[int, int]) -> Order:
         SEPARATOR = order_obj.SEPARATOR
-        res = []
-        for i in range(0, 100):
-            for j in range(100, 256):
-                res.append(f'{hex(i)}/{hex(j)}')
+        CONVERTOR = lambda x: Convertor.std_hex(x)
+        res = [
+            f'{CONVERTOR(i)}/{CONVERTOR(j)}'
+            for i, j in zip(range(start[0], 128), range(start[1], 256))
+        ]
         return order_obj(SEPARATOR.join(res))
+
 
 
 __dir__ = ('Block', 'BaseBlock')
