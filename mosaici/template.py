@@ -14,6 +14,7 @@ import os
 from mosaici.exceptions import *
 from mosaici.order import Order, BaseOrder
 from mosaici.block import Block, BaseBlock
+from mosaici.pattern import Convertor
 
 
 # IMPORT TYPING
@@ -94,21 +95,35 @@ class BaseTemplate:
 
     def to_hex(self) -> tuple[list[hex]]:
         """
-        Template To Hex String
+        Template To Standard Mosaic Hex
+        return:
+            [tuple[list[hex]]]: [Tuple Of Hex Block]
         """
         return [i.to_hex() for i in self._template]
 
     def to_bytes(self) -> tuple[list[bytes]]:
         """
         Template to Bytes
+        return:
+            [tuple[list[bytes]]]: [Tuple Of Bytes Block]
         """
         return [i.to_bytes() for i in self._template]
 
     def to_bin(self) -> tuple[list[bin]]:
         """
-        Template to Binarry Strings
+        Template to Standard Mosaic Binarray Block
+        return:
+            [tuple[list[bin]]]: [Tuple Of Binarray Block]
         """
         return [i.to_bin() for i in self._template]
+
+    def to_oct(self) -> tuple[list[oct]]:
+        """
+        Template to Standard Mosaic Octal Block
+        return:
+            [tuple[list[oct]]]: [Tuple Of Octal Block]
+        """
+        return [i.to_oct() for i in self._template]
 
     def index(self, block: int, value: int) -> int:
         """
@@ -608,9 +623,8 @@ class Template(BaseTemplate):
             size [int]: [Order Size Needed For How Many Order Generated].
         """
         SEPARATOR = order_obj.SEPARATOR
-        res = []
-        for i in range(1, (size + 1)):
-            res.append(f'{hex(i).removeprefix("0x").upper()}/{hex(i*2).removeprefix("0x").upper()}')
+        CONVERTOR = lambda x: Convertor.std_hex(x)
+        res = (f"{CONVERTOR(i)}/{CONVERTOR(i*2)}" for i in range(1, (size + 1)))
         return order_obj(SEPARATOR.join(res))
 
 
