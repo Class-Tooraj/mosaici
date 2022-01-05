@@ -323,7 +323,6 @@ class BaseTemplate:
         try:
             pass
         finally:
-            del self._temp_block, self._template, self._default_block
             del self
 
     @staticmethod
