@@ -18,12 +18,12 @@ from mosaici.store import BaseStoreIndexes
 from mosaici.protocol import BaseReadProtocol, ReadProtocol, ModeName, ModeType
 
 # IMPORT TYPING
-from typing import Iterator
+from typing import Iterable, Iterator
 
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
 # TYPE ALIASES
-T_INDEXES: str | list[hex|int] | tuple[hex|int, ...] | Iterator[str] | BaseStoreIndexes
+T_INDEXES = str | list[hex|int] | tuple[hex|int, ...] | Iterable[str] | BaseStoreIndexes
 
 
 # INDEXES ABSTRACT
@@ -189,7 +189,7 @@ class BaseFileIndexes(BasePattern):
         # If Text File Length Must Size Divided by '2' - 'unicode staff'
         return self._end // 2
 
-    def __iter__(self) -> object:
+    def __iter__(self) -> Iterator[int | str]:
         """
         Make Iterator
         """
