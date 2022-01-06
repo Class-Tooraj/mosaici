@@ -23,7 +23,7 @@ from typing import Iterable, Iterator
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
 # TYPE ALIASES
-T_INDEXES = str | list[hex|int] | tuple[hex|int, ...] | Iterable[str] | BaseStoreIndexes
+T_INDEXES: str | list[hex|int] | tuple[hex|int, ...] | Iterable[str] | BaseStoreIndexes
 
 
 # INDEXES ABSTRACT
