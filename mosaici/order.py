@@ -8,7 +8,7 @@ __EMAIL__ = "Toorajjahangiri@gmail.com"
 
 
 # IMPORT TYPING
-from typing import Generator, Iterable
+from typing import Generator, Iterable, Iterator
 
 # IMPORT LOCAL
 from mosaici.pattern import Convertor
@@ -50,7 +50,7 @@ class BaseOrder:
         """
         raise NotImplemented
 
-    def __iter__(self) -> object:
+    def __iter__(self) -> Iterator[tuple[int, int]]:
         # Reset Current Position Index To Start
         self._current = 0
         return self
