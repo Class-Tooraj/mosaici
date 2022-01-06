@@ -11,6 +11,9 @@ __EMAIL__ = "Toorajjahangiri@gmail.com"
 from functools import lru_cache
 from enum import Enum
 
+# IMPORT TYPING
+from typing import Iterator
+
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
 # WRAPPED TYPE
@@ -226,7 +229,7 @@ class BasePattern:
         """
         raise NotImplemented
 
-    def __iter__(self) -> object:
+    def __iter__(self) -> Iterator[int | str]:
         """
         Iterator
         """
