@@ -11,6 +11,9 @@ __EMAIL__ = "Toorajjahangiri@gmail.com"
 from mosaici.order import Order, BaseOrder
 from mosaici.pattern import Convertor
 
+# IMPORT TYPING
+from typing import Iterator
+
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
 # BLOCK ABSTRACT
@@ -123,7 +126,7 @@ class BaseBlock:
         """
         return [self.convertor.std_oct(i) for i in self._block]
 
-    def __iter__(self) -> object:
+    def __iter__(self) -> Iterator[int]:
         """
         Iterable Block
         Any Time Call Iter Or Use Iter Current Index Cleared.
