@@ -18,12 +18,12 @@ from mosaici.pattern import Convertor
 
 
 # IMPORT TYPING
-from typing import NamedTuple
+from typing import NamedTuple, Iterator
 
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
 # DEFAULT BLOCK ITER TYPE SUPPORT
-T_ITER: tuple[int, ...] | list[int] = tuple[int, ...] | list[int]
+T_ITER = tuple[int, ...] | list[int]
 
 
 # TEMPLATE ABSTRACT
@@ -37,7 +37,7 @@ class BaseTemplate:
 
     def __init__(
         self,
-        blocks: tuple[BaseBlock] = None,
+        blocks: tuple[BaseBlock, ...] = None,
         order: BaseOrder | str = None,
         default_block: BaseBlock | T_ITER = None,
         ) -> None:
@@ -93,7 +93,7 @@ class BaseTemplate:
         """
         raise NotImplemented
 
-    def to_hex(self) -> tuple[list[hex]]:
+    def to_hex(self) -> tuple[list[hex], ...]:
         """
         Template To Standard Mosaic Hex
         return:
@@ -101,7 +101,7 @@ class BaseTemplate:
         """
         return [i.to_hex() for i in self._template]
 
-    def to_bytes(self) -> tuple[list[bytes]]:
+    def to_bytes(self) -> tuple[list[bytes], ...]:
         """
         Template to Bytes
         return:
@@ -109,7 +109,7 @@ class BaseTemplate:
         """
         return [i.to_bytes() for i in self._template]
 
-    def to_bin(self) -> tuple[list[bin]]:
+    def to_bin(self) -> tuple[list[bin], ...]:
         """
         Template to Standard Mosaic Binarray Block
         return:
@@ -117,7 +117,7 @@ class BaseTemplate:
         """
         return [i.to_bin() for i in self._template]
 
-    def to_oct(self) -> tuple[list[oct]]:
+    def to_oct(self) -> tuple[list[oct], ...]:
         """
         Template to Standard Mosaic Octal Block
         return:
@@ -230,7 +230,7 @@ class BaseTemplate:
         _block_idx = self.valid_block(block_idx, len(self))
         return self[_block_idx]
 
-    def __iter__(self) -> object:
+    def __iter__(self) -> Iterator[BaseBlock]:
         """
         Make Object Iterable
         """
@@ -479,7 +479,7 @@ class BaseFileTemplate(BaseTemplate):
         """
         return self._end // self._member
 
-    def __iter__(self) -> object:
+    def __iter__(self) -> Iterator[BaseBlock]:
         """
         Iterator
         return:
