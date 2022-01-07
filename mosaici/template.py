@@ -505,7 +505,7 @@ class BaseFileTemplate(BaseTemplate):
 
         self._file.seek(self._current, 0)
         temp = self._file.read(self._member)
-        self._current += 256
+        self._current += self._member
         temp = tuple((int(i) for i in temp))
         return self.BLOCK(temp)
 
@@ -513,8 +513,7 @@ class BaseFileTemplate(BaseTemplate):
         """
         Get Block With Block Idx
         """
-        self._current = 0
-        self._current *= (block_idx * self._member)
+        self._current = (block_idx * self._member)
         if self._current > (self._end - 256):
             raise IndexError
         return next(self)
