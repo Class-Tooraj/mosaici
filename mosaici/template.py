@@ -346,11 +346,10 @@ class BaseTemplate:
             [int]: [Block if Exists OtherWise Converted To Existed Block].
         """
         # I Changed Algorithm - Fixed Problem Maximum Recursion & Very Low Speed For Working
-        done = False
         while idx_block >= size:
 
             if idx_block == size:
-                idx_block -= (size << 1)
+                idx_block -= (size >> 1)
                 continue
 
             elif idx_block <= (size + (size//2)):
@@ -365,7 +364,7 @@ class BaseTemplate:
                 idx_block -= size
                 continue
 
-        return idx_block
+        return abs(idx_block)
 
 
 # FILE TEMPLATE ABSTRACT
@@ -515,6 +514,7 @@ class BaseFileTemplate(BaseTemplate):
         """
         self._current = (block_idx * self._member)
         if self._current > (self._end - 256):
+            self._current = 0
             raise IndexError
         return next(self)
 
