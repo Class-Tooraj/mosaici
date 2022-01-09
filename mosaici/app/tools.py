@@ -140,3 +140,20 @@ def error(err: Exception, more: str = None) -> str:
         return Color.colorize(txt, Color.ERROR)
     return txt
 
+
+
+__dir__ = (
+    "supports_color",
+    "Color",
+    "Json",
+    "path_join",
+    "basename",
+    "get_terminal_size",
+    "monotonic",
+    "color_print",
+    "icol",
+    "center",
+    "spacer",
+    "error",
+    "SUPPORT_COLOR"
+    )
