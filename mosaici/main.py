@@ -24,6 +24,8 @@ from mosaici.app import first_run
 
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
+VERSION: Final = '0.9'
+
 if first_run.is_first_run():
     cprint(center("... < Mosaici App is First Run > ..."), "title")
     cprint("/> Configure Requirements ", "work")
@@ -359,7 +361,7 @@ def mosaici_app(parse: argparse.ArgumentParser) -> int:
     parse.add_argument(
         '--mode',
         type=str,
-        choices= ['data', 'mosaic'],
+        choices= ['data', 'mosaic', 'enc', 'dec', 'encrypt', 'decrypt'],
         default = defaults["mode"],
         help="Mode Action `mosaic` for Data To Mosaic, `data` for Mosaic To Data"
     )
@@ -428,9 +430,9 @@ def mosaici_app(parse: argparse.ArgumentParser) -> int:
 
     cprint('/> Mode Convert To Type', 'work')
     match arguments['mode']:
-        case 'mosaic':
+        case 'mosaic' | 'enc' | 'encrypt':
             arguments['mode'] = 'data'
-        case 'data':
+        case 'data' | 'dec' | 'decrypt':
             arguments['mode'] = 'indexes'
 
     cprint('/> Result File Validation', 'work')
@@ -510,6 +512,13 @@ def main(argv: Sequence[str] = None) -> int:
         'Mosaici',
         description= "Mosaici Protocol For Coverting Data To Indexes Of Pattern."
         )
+
+    parse.add_argument(
+        '--version',
+        '-V',
+        action = 'version',
+        version=f'%(prog)s {VERSION}'
+    )
 
     defaults = CONFIG['app']
     template_call = defaults['template_call']
