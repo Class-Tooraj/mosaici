@@ -23,7 +23,7 @@ Mosaic Object - All Mosaic Module Instance Of BaseMosaic
 # STANDARD MOSAIC FILE
 class MosaicFile(BaseMosaicFile):
     """
-    MosaicFile - Instance of BaseMosaicFileTemplate
+    MosaicFile - Instance of BaseMosaicFile
     This Module Customized For Working Easy and Better With File
     """
     TEMPLATE: Template = Template
