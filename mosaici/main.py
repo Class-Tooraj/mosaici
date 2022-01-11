@@ -24,7 +24,7 @@ from mosaici.app import first_run
 
 # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\^////////////////////////////// #
 
-VERSION: Final = '0.9'
+VERSION: Final = '0.9.1'
 
 if first_run.is_first_run():
     cprint(center("... < Mosaici App is First Run > ..."), "title")
